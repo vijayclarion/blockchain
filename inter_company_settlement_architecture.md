@@ -137,6 +137,30 @@ We define a collection `collectionMaroon` (for A & B):
 *   **OrgA & OrgB**: Store actual claim details (Policy#, Amount, PII) in their local SideDB.
 *   **Neutral Org**: Stores only the **Private Data Hash** on the public ledger. They can verify *that* a transaction occurred and its immutability, but cannot read the content unless explicitly shared (e.g., during a dispute via an ephemeral Key exchange or off-chain channel).
 
+### Failure Scenarios & Resilience
+
+#### 1. Peer Gossip Failure (Link between A and B Down)
+*   **Scenario**: Connection is severed, or Peer B is offline.
+*   **Immediate Impact**:
+    *   **Public Data**: No impact. Public blocks come from the Orderer, not Gossip.
+    *   **Private Data (PDC)**: Critical. If OrgA proposes a transaction, it cannot push the transient private data to OrgB.
+        *   If Endorsement Policy requires OrgB, the transaction **fails** (OrgB cannot endorse what it cannot see).
+        *   If Endorsement Policy allows OrgA only, transaction commits, but OrgB has "Missing Private Data" in its ledger.
+*   **Recovery**:
+    *   **Reconciliation**: When the link is restored, OrgB's Gossip component identifies missing data holes.
+    *   **Pull Mechanism**: OrgB initiates a "Pull" request to OrgA to fetch the missing PDCs and synchronizes its SideDB.
+
+#### 2. Orderer Access Failure (Link A → Neutral Down)
+*   **Scenario**: OrgA Peer cannot reach Neutral Orderer.
+*   **Immediate Impact**:
+    *   **Submission**: OrgA cannot submit new transactions (SDK throws "Service Unavailable").
+    *   **Ledger Sync**: OrgA Peer stops receiving new blocks. It becomes "stale" (Lagging behind).
+*   **Recovery**:
+    *   **Submission**: The Client SDK (Application) has built-in retry logic. It will retry connections to other available orderers (if any) or wait for restoration.
+    *   **Deliver (Sync)**: The Peer has automatic reconnection logic.
+        *   Once connection is restored, the Peer sends a seek info request: *"I have Block #100. Send me everything after that."*
+        *   The Orderer streams Blocks #101 to Current. No data is lost.
+
 ---
 
 ## 4. Infrastructure Requirements
