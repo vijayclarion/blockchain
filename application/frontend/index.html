@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterConnect Settlement</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">InterConnect <span class="highlight">Settlement</span></div>
+            <div class="user-profile">
+                <span>Org1 Agent</span>
+                <div class="avatar">OM</div>
+            </div>
+        </header>
+
+        <main>
+            <div class="top-bar">
+                <h1>Claims Dashboard</h1>
+                <button id="new-claim-btn" class="btn primary">+ New Claim</button>
+            </div>
+
+            <div class="stats-cards">
+                <div class="card">
+                    <h3>Total Claims</h3>
+                    <p id="total-claims">0</p>
+                </div>
+                <div class="card">
+                    <h3>Pending Approval</h3>
+                    <p id="pending-claims">0</p>
+                </div>
+                <div class="card">
+                    <h3>Settled</h3>
+                    <p id="settled-claims">0</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Policy ID</th>
+                            <th>Claimant</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="claims-table-body">
+                        <!-- Claims will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for New Claim -->
+    <div id="claim-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-modal" class="close">&times;</span>
+            <h2>Submit New Claim</h2>
+            <form id="claim-form">
+                <div class="form-group">
+                    <label for="claim-id">Claim ID</label>
+                    <input type="text" id="claim-id" placeholder="CLM..." required>
+                </div>
+                <div class="form-group">
+                    <label for="policy-id">Policy ID</label>
+                    <input type="text" id="policy-id" placeholder="POL..." required>
+                </div>
+                <div class="form-group">
+                    <label for="claimant-name">Claimant Name</label>
+                    <input type="text" id="claimant-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount ($)</label>
+                    <input type="number" id="amount" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="approver-msp">Approver MSP</label>
+                    <input type="text" id="approver-msp" value="Org2MSP" required>
+                </div>
+                <button type="submit" class="btn primary full-width">Submit Claim</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
