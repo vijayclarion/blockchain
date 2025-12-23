@@ -56,7 +56,25 @@ Regardless of the strategy, **Peer-to-Peer (Gossip)** connectivity is required b
 
 #### Connectivity for Strategy A (Neutral Hosted)
 *   **Peer Gossip (A ↔ B)**: Ports `7051` (Exchange PDCs & Block announcements).
+    *   **Protocol**: gRPC over HTTP/2.
+    *   **Stream Type**: **Bidirectional Streaming RPC** (`GossipStream`).
+        *   Both peers can send and receive messages continuously over the same open connection.
+        *   This allows real-time, two-way exchange of data (unlike the Orderer where data mostly flows one way).
+    *   **Mechanism**: **Epidemic / Randomized**.
+    *   **Behavior**: Peers do *not* maintain a static link to every other peer. They connect to a few random peers ("propagate" list) and periodically shuffle.
+    *   **Push/Pull**: It uses both.
+        *   **Push**: When a new block or PDC arrives, it pushes an announcement to connected peers.
+        *   **Pull**: Peers periodically compare their ledger height (state) and "pull" missing data from neighbors.
 *   **Orderer Access (A/B → Neutral)**: OrgA and OrgB Peers/Clients must reach Neutral Org Orderers on port `7050` (or `9443` if separate).
+    *   **Protocol**: gRPC over **HTTP/2**.
+    *   **Mechanism**: **Server-Side Streaming RPC**.
+        *   Unlike HTTP/1.1 (Request -> Response -> Close), gRPC uses **HTTP/2 Streams**.
+        *   The Peer sends **one** request (`Deliver` RPC).
+        *   The Orderer keeps the stream open indefinitely and sends a sequence of responses (Blocks) over time.
+        *   The connection is **NOT** terminated after a block is sent. It remains active for hours/days unless interrupted by network failure.
+    *   **Data Flow (Push)**: The Peer initiates the connection (Deliver Client), but the data flow is **Event-Driven PUSH**. The Peer does *not* poll. The Orderer pushes blocks immediately upon generation.
+    *   **Frequency**: **Real-time**. There is no "polling interval". Peers receive blocks milliseconds after they are generated.
+    *   *Note*: High latency affects the "deliver" stream (block reception), but does not break the consensus cluster since A/B are not part of Raft.
 *   **Consensus**: Internal only to Neutral Org (no cross-org Raft traffic).
 
 #### Connectivity for Strategy B (Distributed Raft)
