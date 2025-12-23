@@ -111,6 +111,25 @@ Regardless of the strategy, **Peer-to-Peer (Gossip)** connectivity is required b
     *   **Recommended**: 1 Gbps+ for high throughput (100+ TPS) or large blocks (2MB+).
     *   *Note*: Block propagation is "bursty". If PDCs involve large files (e.g., PDF Claim documents), bandwidth requirements scale linearly with document size/frequency. Consider off-chain storage (IPFS/S3) for files > 2MB.
 
+#### Achieving < 200ms Latency (Infrastructure Recommendations)
+To guarantee the strict latency requirements for stable Gossip and Ordering:
+
+#### Achieving < 200ms Latency (On-Premise Recommendations)
+Since the infrastructure is purely **On-Premise**, reliable connectivity depends on the Physical Link choice:
+
+1.  **Dedicated Leased Lines / MPLS (Gold Standard)**:
+    *   **Description**: Establishing a private P2P fiber link (MPLS L3VPN or Dark Fiber) between OrgA, OrgB, and Neutral Datacenters.
+    *   **Pros**: Guaranteed SLA, Fixed Latency (typically <30ms intra-country), High Security.
+    *   **Cons**: High Cost, long provisioning time.
+2.  **SD-WAN (Silver Standard)**:
+    *   **Description**: Software-Defined WAN appliances (e.g., Cisco Viptela, Velocloud) that bond multiple internet links (ISP A + ISP B) and optimize routing paths.
+    *   **Pros**: Mitigation of public internet jitter/packet loss. much cheaper than MPLS.
+    *   **Result**: Stable <100ms (depending on geography).
+3.  **Site-to-Site VPN over Business Broadband (Bronze)**:
+    *   **Warning**: Public Internet routing is unpredictable ("Jitter").
+    *   **Requirement**: If using this, ensure both sides have business-grade ISP SLAs and are not geographically antipodal (e.g., NY to London is fine ~70ms; NY to Sydney is bad ~200ms+).
+    *   **Optimization**: Host the "Neutral Org" resources in a Carrier-Neutral Datacenter (e.g., Equinix) that has good peering with both Insurers' ISPs.
+
 ---
 
 ## 3. Privacy: Private Data Collections (PDC)
